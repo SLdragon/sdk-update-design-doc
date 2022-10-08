@@ -24,6 +24,8 @@ export interface AuthenticationConfiguration {
 ->
 
 ```ts
+// Current validation logic for clientSecret and  certificateContent is different from below definition
+// Current logic will use certificateContent as default, if no certificateContent, then use clientSecret
 export type OnBehalfOfCredentialAuthConfig = {
   authorityHost: string;
   clientId: string;
