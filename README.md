@@ -6,12 +6,9 @@
 
 ### Deprecate `AuthenticationConfiguration` interface and use separate auth config instead
 
-### Deprecate `executionWithToken` and use `executionWithTokenAndConfig` instead
+### Deprecate `handleMessageExtensionQueryWithToken` and use `handleMessageExtensionQueryWithSSO` instead
 
 ### Deprecate `createMicrosoftGraphClient` and use `createMicrosoftGraphClientWithCredential` instead
-
-
-### [Optional] Deprecate `TeamsUserCredential`, `OnBehalfOfUserCredential`, `AppCredential`, `TeamsBotSsoPrompt`, `BotSsoConfig`, `BotSsoExecutionDialog`     
 
 ## Code Update
 
@@ -52,14 +49,6 @@ export type OnBehalfOfCredentialAuthConfig = {
 
 export type AppCredentialAuthConfig = OnBehalfOfCredentialAuthConfig;
 
-// Current validation logic inside getTediousConnectionConfig class is different from below definition
-// Current logic will use sqlIdentityId as default, if no sqlIdentityId, then use sqlUserName and password
-export type SQLAuthConfig = {
-  sqlServerEndpoint: string;
-} & (
-  | { sqlUsername: string; sqlPassword: string; sqlIdentityId?: never }
-  | { sqlUsername?: never; sqlPassword?: never; sqlIdentityId: string }
-);
 ```
 
 ### Update credential constructor to use different auth config:
@@ -78,16 +67,23 @@ constructor(authConfig: AuthenticationConfiguration);
 ->
 
 ```ts
-// Solution 1:
 // TeamsUserCredential constructor
+constructor(authConfig: TeamsUserCredentialAuthConfig);
+constructor(authConfig: AuthenticationConfiguration);
 constructor(authConfig: TeamsUserCredentialAuthConfig | AuthenticationConfiguration)
 
 // OnBehalfOfUserCredential constructor
+constructor(ssoToken: string, config: OnBehalfOfCredentialAuthConfig);
+constructor(ssoToken: string, config: AuthenticationConfiguration);
 constructor(ssoToken: string, config: OnBehalfOfCredentialAuthConfig | AuthenticationConfiguration);
 
-// AppCredential constructor
-constructor(authConfig: AppCredentialAuthConfig | AuthenticationConfiguration);
 
+// AppCredential constructor
+constructor(authConfig: AppCredentialAuthConfig);
+constructor(authConfig: AuthenticationConfiguration);
+constructor(authConfig: AppCredentialAuthConfig | AuthenticationConfiguration)
+
+/* Other abandoned solution
 
 // Solution 2: Change credential name and create a new class:
 // TeamsUserCredentialV2 constructor
@@ -107,6 +103,8 @@ OnBehalfOfUserCredential.create(ssoToken: string, config: OnBehalfOfCredentialAu
 
 // AppCredentialV2 constructor
 AppCredential.create(authConfig: AppCredentialAuthConfig):AppCredential
+*/
+~~~
 ```
 
 ### Update `TeamsBotSsoPrompt` to use `BotSsoAuthConfig`:
@@ -123,15 +121,24 @@ constructor(
 ->
 
 ```ts
+  constructor(teamsfx: TeamsFx, dialogId: string, settings: TeamsBotSsoPromptSettings);
+  constructor(
+    authConfig: OnBehalfOfCredentialAuthConfig,
+    initiateLoginEndpoint: string,
+    dialogId: string,
+    settings: TeamsBotSsoPromptSettings
+  );
+  constructor() 
+
+/* Other abandoned solution
 // solution 1
 constructor(
   private teamsfx: TeamsFx | (OnBehalfOfCredentialAuthConfig & { loginUrl: string })
   dialogId: string,
   private settings: TeamsBotSsoPromptSettings
 )
-
 // solution 2
-constructor(
+constructor(jgdsrt
   private teamsfx: TeamsFx | OnBehalfOfCredentialAuthConfig
   dialogId: string,
   private settings: TeamsBotSsoPromptSettings,
@@ -153,10 +160,11 @@ TeamsBotSsoPrompt.create(
   dialogId: string,
   private settings: TeamsBotSsoPromptSettings
 ): TeamsBotSsoPrompt
+*/
 
 ```
 
-### Update `BotSsoExecutionDialog` to use `BotSsoAuthConfig`
+### Update `BotSsoExecutionDialog`
 
 ```ts
 constructor(
@@ -170,11 +178,37 @@ constructor(
 ->
 
 ```ts
+  constructor(
+    dedupStorage: Storage,
+    ssoPromptSettings: TeamsBotSsoPromptSettings,
+    teamsfx: TeamsFx,
+    dialogName?: string
+  );
+  constructor(
+    dedupStorage: Storage,
+    ssoPromptSettings: TeamsBotSsoPromptSettings,
+    authConfig: OnBehalfOfCredential,
+    initiateLoginEndpoint: string,
+    dialogName?: string
+  );
+  constructor()
+
+
+/* Other abandoned solution
 // Solution 1: 
 constructor(
   dedupStorage: Storage,
   ssoPromptSettings: TeamsBotSsoPromptSettings,
   teamsfx: TeamsFx | (OnBehalfOfCredentialAuthConfig & { loginUrl: string })
+  dialogName?: string
+)
+
+// Solution 3, create a new class use a different name and deprecate BotSsoExecutionDialog 
+constructor(
+  dedupStorage: Storage,
+  ssoPromptSettings: TeamsBotSsoPromptSettings,
+  authConfig: OnBehalfOfCredentialAuthConfig,
+  loginUrl: string,
   dialogName?: string
 )
 
@@ -187,15 +221,6 @@ constructor(
   loginUrl?: string
 )
 
-// Solution 3, create a new class use a different name and deprecate BotSsoExecutionDialog 
-constructor(
-  dedupStorage: Storage,
-  ssoPromptSettings: TeamsBotSsoPromptSettings,
-  authConfig: OnBehalfOfCredentialAuthConfig,
-  loginUrl: string,
-  dialogName?: string
-)
-
 // Solution 4: add a static function to create instance
 BotSsoExecutionDialog.create(
   dedupStorage: Storage,
@@ -204,6 +229,7 @@ BotSsoExecutionDialog.create(
   loginUrl: string,
   dialogName?: string
 )
+*/
 
 ```
 
@@ -211,27 +237,27 @@ BotSsoExecutionDialog.create(
 
 ```ts
 // original
-export async function executionWithToken(
+export async function handleMessageExtensionQueryWithToken(
   context: TurnContext,
-  config: AuthenticationConfiguration,
+  config: AuthenticationConfiguration | null,
   scopes: string | string[],
-  logic?: (token: MessageExtensionTokenResponse) => Promise<any>
-);
+  logic: (token: MessageExtensionTokenResponse) => Promise<any>
+)
 ```
 
 ->
 
 ```ts
-export async function executionWithTokenAndConfig(
+export async function handleMessageExtensionQueryWithSSO(
   context: TurnContext,
-  authConfig: OnBehalfOfCredentialAuthConfig,
-  loginUrl: string,
+  config: OnBehalfOfCredential | null,
+  initiateLoginEndpoint: string,
   scopes: string | string[],
-  logic?: (token: MessageExtensionTokenResponse) => Promise<any>
-);
+  logic: (token: MessageExtensionTokenResponse) => Promise<any>
+)
 ```
 
-### Update `BotSsoConfig` to `BotSsoConfigV2`:
+### Update `BotSsoConfig` to `BotSsoConfig`:
 
 ```ts
 export interface BotSsoConfig {
@@ -245,11 +271,12 @@ export interface BotSsoConfig {
 ->
 
 ```ts
-export interface BotSsoConfigV2 {
+export interface BotSsoConfig {
   aad: {
     scopes: string[];
-    loginUrl: string;
-  } & OnBehalfOfCredentialAuthConfig;
+  }
+  | (OnBehalfOfCredentialAuthConfig & { initiateLoginEndpoint: string })
+  | AuthenticationConfiguration;
   ...
 }
 ```
@@ -344,7 +371,10 @@ const client = createMicrosoftGraphClientWithCredential(appCredential, scope);
       executionWithToken
       createMicrosoftGraphClient
 
+  Only rename the below class and interface:
 
+        handleMessageExtensionQueryWithToken
+        createMicrosoftGraphClient
 
 - Naming for the changed API?
 
@@ -359,6 +389,11 @@ const client = createMicrosoftGraphClientWithCredential(appCredential, scope);
       executionWithToken -> executionWithTokenAndConfig
       createMicrosoftGraphClient -> createMicrosoftGraphClientWithCredential
 
+  Rename as below:
+
+      handleMessageExtensionQueryWithToken -> handleMessageExtensionQueryWithSSO
+      createMicrosoftGraphClient -> createMicrosoftGraphClientWithCredential
+      
 ### Already discussed
 - `AppCredentialAuthConfig` and `OnBehalfOfCredentialAuthConfig` are the same, do we need to define only one type for these two auth config?
 
