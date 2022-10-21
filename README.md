@@ -295,17 +295,10 @@ export function createMicrosoftGraphClient(
 ```ts
 // Change the function name and make original createMicrosoftGraphClient deprecated
 
-// In browser
 export function createMicrosoftGraphClientWithCredential(
-  credential: TeamsUserCredential,
+  credential: TokenCredential,
   scopes?: string | string[]
-): Client
-
-// In node
-export function createMicrosoftGraphClientWithCredential(
-  credential: OnBehalfOfCredential | AppCredential
-  scopes?: string | string[]
-): Client
+): Client 
 
 ```
 
