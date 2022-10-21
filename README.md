@@ -107,7 +107,7 @@ AppCredential.create(authConfig: AppCredentialAuthConfig):AppCredential
 ~~~
 ```
 
-### Update `TeamsBotSsoPrompt` to use `BotSsoAuthConfig`:
+### Update `TeamsBotSsoPrompt` to use `OnBehalfOfCredentialAuthConfig` and `initiateLoginEndpoint`:
 
 ```ts
 // original
@@ -233,7 +233,7 @@ BotSsoExecutionDialog.create(
 
 ```
 
-### Update message extension `executionWithToken` function to use `MsgExtAuthConfig`:
+### Update message extension `executionWithToken` function to use `OnBehalfOfCredential` and `initiateLoginEndpoint`:
 
 ```ts
 // original
@@ -257,7 +257,7 @@ export async function handleMessageExtensionQueryWithSSO(
 )
 ```
 
-### Update `BotSsoConfig` to `BotSsoConfig`:
+### Update `BotSsoConfig` to use `OnBehalfOfCredentialAuthConfig` and `initiateLoginEndpoint`:
 
 ```ts
 export interface BotSsoConfig {
