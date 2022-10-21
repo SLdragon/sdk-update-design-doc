@@ -2,13 +2,13 @@
 
 ## Deprecated APIs
 
-### Deprecate `TeamsFx` class, and update all the template and samples to directly use credentials instead.
+- Deprecate `TeamsFx` class, and update all the template and samples to directly use credentials instead.
 
-### Deprecate `AuthenticationConfiguration` interface and use separate auth config instead
+- Deprecate `AuthenticationConfiguration` interface and use separate auth config instead
 
-### Deprecate `handleMessageExtensionQueryWithToken` and use `handleMessageExtensionQueryWithSSO` instead
+- Deprecate `handleMessageExtensionQueryWithToken` and use `handleMessageExtensionQueryWithSSO` instead
 
-### Deprecate `createMicrosoftGraphClient` and use `createMicrosoftGraphClientWithCredential` instead
+- Deprecate `createMicrosoftGraphClient` and use `createMicrosoftGraphClientWithCredential` instead
 
 ## Code Update
 
