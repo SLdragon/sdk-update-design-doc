@@ -306,6 +306,28 @@ export function createMicrosoftGraphClientWithCredential(
 ## API Usage sample:
 
 ```ts
+// Usage before
+// Use teamsfx as parameter and user may confuse that which configuration and environment variable should be used for teamsfx
+
+// In browser: tab
+const teamsfx = new TeamsFx();
+const graphClient = createMicrosoftGraphClient(teamsfx, ["User.Read"]);
+
+// In node: OnBehalfOfUserCredential
+teamsfx = new TeamsFx().setSsoToken(accessToken);
+const graphClient = createMicrosoftGraphClient(teamsfx, ["User.Read"]);
+
+// In node: AppCredential
+const teamsfx = new TeamsFx(IdentityType.App);
+const token = teamsfx.getCredential().getToken();
+const graphClient = createMicrosoftGraphClient(teamsfx, ["User.Read"]);
+```
+
+->
+
+
+```ts
+// After update
 // In browser: TeamsUserCredential
 const authConfig: TeamsUserCredentialAuthConfig = {
   clientId: "xxx",
@@ -319,6 +341,8 @@ await credential.login(scope);
 
 const client = createMicrosoftGraphClientWithCredential(credential, scope);
 ```
+
+
 
 ```ts
 // In node: OnBehalfOfUserCredential
