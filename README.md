@@ -250,7 +250,7 @@ export async function handleMessageExtensionQueryWithToken(
 ```ts
 export async function handleMessageExtensionQueryWithSSO(
   context: TurnContext,
-  config: OnBehalfOfCredential | null,
+  config: OnBehalfOfCredentialAuthConfig | null,
   initiateLoginEndpoint: string,
   scopes: string | string[],
   logic: (token: MessageExtensionTokenResponse) => Promise<any>
@@ -330,8 +330,8 @@ const graphClient = createMicrosoftGraphClient(teamsfx, ["User.Read"]);
 // After update
 // In browser: TeamsUserCredential
 const authConfig: TeamsUserCredentialAuthConfig = {
-  clientId: "xxx",
-  initiateLoginEndpoint: "https://xxx/auth-start.html",
+  clientId: process.env.REACT_APP_CLIENT_ID,
+  initiateLoginEndpoint: process.env.REACT_APP_START_LOGIN_PAGE_URL,
 };
 
 const credential = new TeamsUserCredential(authConfig);
@@ -340,30 +340,25 @@ const scope = "User.Read";
 await credential.login(scope);
 
 const client = createMicrosoftGraphClientWithCredential(credential, scope);
-```
 
-
-
-```ts
 // In node: OnBehalfOfUserCredential
 const oboAuthConfig: OnBehalfOfCredentialAuthConfig = {
-  authorityHost: "xxx",
-  clientId: "xxx",
-  tenantId: "xxx",
-  clientSecret: "xxx",
+  authorityHost: process.env.M365_AUTHORITY_HOST,
+  clientId: process.env.M365_CLIENT_ID,
+  tenantId: process.env.M365_TENANT_ID,
+  clientSecret: process.env.M365_CLIENT_SECRET,
 };
 
 const oboCredential = new OnBehalfOfUserCredential(ssoToken, oboAuthConfig);
 const scope = "User.Read";
 const client = createMicrosoftGraphClientWithCredential(oboCredential, scope);
-```
 
-```ts
 // In node: AppCredential
 const appAuthConfig: AppCredentialAuthConfig = {
-  clientId: "xxx",
-  tenantId: "xxx",
-  clientSecret: "xxx",
+  authorityHost: process.env.M365_AUTHORITY_HOST,
+  clientId: process.env.M365_CLIENT_ID,
+  tenantId: process.env.M365_TENANT_ID,
+  clientSecret: process.env.M365_CLIENT_SECRET,
 };
 const appCredential = new AppCredential(appAuthConfig);
 const scope = "User.Read";
