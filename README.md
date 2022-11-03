@@ -303,6 +303,67 @@ export function createMicrosoftGraphClientWithCredential(
 ```
 
 
+### sdk-react Update
+Add two new functions as the replacement for `useTeamsFx`, `useGraph`:
+
+Before:
+```ts
+type GraphOption = {
+  scope?: string[];
+  teamsfx?: TeamsFx;
+};
+
+export function useGraph<T>(
+  fetchGraphDataAsync: (graph: Client, teamsfx: TeamsFx, scope: string[]) => Promise<T>,
+  options?: GraphOption
+): Data<T>
+
+export type TeamsFxContext = {
+  teamsfx?: TeamsFx;
+  loading: boolean;
+  error: unknown;
+  inTeams?: boolean;
+  theme: ThemePrepared;
+  themeString: string;
+  context?: any;
+};
+
+export function useTeamsFx(teamsfxConfig?: Record<string, string>): TeamsFxContext
+
+```
+
+After:
+```ts
+type GraphOptionWithAuthConfig = {
+  scope?: string[];
+  authConfig?: TeamsUserCredentialAuthConfig;
+};
+
+export function useGraphWithCredential<T>(
+  fetchGraphDataAsync: (
+    graph: Client,
+    credential: TeamsUserCredential,
+    scope: string[]
+  ) => Promise<T>,
+  options?: GraphOptionWithAuthConfig
+): Data<T>
+
+export type TeamsContextWithCredential = {
+  teamsUserCredential?: TeamsUserCredential;
+  loading: boolean;
+  error: unknown;
+  inTeams?: boolean;
+  theme: ThemePrepared;
+  themeString: string;
+  context?: any;
+};
+
+export function useTeamsUserCredential(
+  authConfig: TeamsUserCredentialAuthConfig
+): TeamsContextWithCredential
+
+```
+
 ## API Usage sample:
 
 ```ts
